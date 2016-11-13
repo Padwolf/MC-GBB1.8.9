@@ -1,0 +1,16 @@
+[
+{
+  "modid": "greatbluebox",
+  "name": "TARDIS Mod",
+  "description": "This mod allows players to have their own TARDIS.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Padthewolf"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -4,6 +4,7 @@ import com.padwolf.minecraft.gbb.GBB;
 import com.padwolf.minecraft.gbb.network.messages.EntityUpdateMessage;
 import com.padwolf.minecraft.gbb.refs.Functions;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.player.EntityPlayer;
@@ -76,7 +77,7 @@ public class EntityTARDIS extends EntityLiving{
 		if (riddenByEntity != null){
 			if (riddenByEntity.isSneaking()) riddenByEntity.setInvisible(false);
 			else {
-				
+				if (worldObj.isRemote){
 				this.prevPosX = this.posX;
 		        this.prevPosY = this.posY;
 		        this.prevPosZ = this.posZ;
@@ -85,23 +86,20 @@ public class EntityTARDIS extends EntityLiving{
 				
 				if (riddenByEntity instanceof EntityLiving)
 					this.rotationYaw = riddenByEntity.getRotationYawHead();
-				setVelocity(this.riddenByEntity.motionX, 0, this.motionZ += riddenByEntity.motionZ);
-				this.motionX = MathHelper.clamp_double(this.motionX + riddenByEntity.motionX, -20, 20);
-				this.motionZ = MathHelper.clamp_double(this.motionZ + riddenByEntity.motionZ, -20, 20);
-				this.moveEntity(this.motionX, this.motionY, this.motionZ);
-				if (worldObj.isRemote) {
-					this.setPosition(posX+riddenByEntity.motionX, posY+this.motionY, posZ+riddenByEntity.motionZ);
-					this.setRotation(this.rotationYaw, this.rotationPitch);
-				}
+				this.moveEntity(motionX = MathHelper.clamp_double(this.motionX + riddenByEntity.motionX, -20, 20), 0, motionZ = MathHelper.clamp_double(this.motionZ + riddenByEntity.motionZ, -20, 20));
+				//setPositionAndUpdate(posX+=motionX, posY+=motionY, posZ+=motionZ);
 				
-//				if (this.worldObj.isRemote) {
-//					NBTTagCompound update = new NBTTagCompound();
-//					//update.setDouble("x", posX);
-//					//update.setDouble("y", posY);
-//					//update.setDouble("z", posZ);
-//					
-//					GBB.CHANNEL.sendToServer(new EntityUpdateMessage(this.getEntityId(), update));
-//				}
+				System.out.println("            " +
+						((worldObj.isRemote) ? "Client" : "Server") + " World | " +
+						"X:" + this.getPosition().getX() + " | Y:" + this.getPosition().getY() + " | Z:" + this.getPosition().getZ());
+					
+				NBTTagCompound update = new NBTTagCompound();
+				update.setDouble("x", posX);
+				update.setDouble("y", posY);
+				update.setDouble("z", posZ);
+					
+				GBB.CHANNEL.sendToServer(new EntityUpdateMessage(this.getEntityId(), update));
+				}
 			}
 		}
 		
@@ -109,8 +107,13 @@ public class EntityTARDIS extends EntityLiving{
 	}
 	
 	@Override
+	public boolean shouldDismountInWater(Entity rider) {
+		return false;
+	}
+	
+	@Override
 	public double getMountedYOffset() {
-		if (riddenByEntity != null) return -0.25;
+		if (riddenByEntity != null) return -0.15;
 		return super.getMountedYOffset();
 	}
 	
@@ -130,6 +133,16 @@ public class EntityTARDIS extends EntityLiving{
 		return false;
 	}
 	
+
+
+	public void setSyncDataCompound(NBTTagCompound tag) {
+		if (!worldObj.isRemote){
+			setPositionAndUpdate(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
+			
+			System.out.println((worldObj.isRemote) ? "Client" : "Server" + " World | " +
+					"X:" + this.getPosition().getX() + " | Y:" + this.getPosition().getY() + " | Z:" + this.getPosition().getZ());
+		}
+	}
 	
 	//Getters and Setters
 	//Dimension
@@ -148,10 +161,6 @@ public class EntityTARDIS extends EntityLiving{
 	
 	public EntityPlayer getOwner(){
 		return owner;
-	}
-
-	public void setSyncDataCompound(NBTTagCompound entityDataCompound) {
-		
 	}
 
 }

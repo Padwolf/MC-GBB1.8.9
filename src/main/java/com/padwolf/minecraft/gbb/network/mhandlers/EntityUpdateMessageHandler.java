@@ -4,7 +4,6 @@ import com.padwolf.minecraft.gbb.entities.EntityTARDIS;
 import com.padwolf.minecraft.gbb.network.messages.EntityUpdateMessage;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.IThreadListener;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
